@@ -88,3 +88,38 @@ for i in range(len(df_lng)):
 oe = OrdinalEncoder(categories=[['elementary', 'limited_working', 'professional_working', 'full_professional', 'native_or_bilingual']])
 prof = df_lng[['proficiency']]
 df_lng['PROF'] = oe.fit_transform(prof)
+
+
+# For Train dataset
+lng_df = pd.DataFrame(columns=['user_id'])
+lng_df['user_id'] = df_train['user_id']
+merged_df_train = lng_df.merge(df_lng, on='user_id', how='left')
+merged_df_train = merged_df_train.groupby('user_id').sum().reset_index()
+# We will divide total proficiency the total languages.
+merged_df_train['PROF'] = (merged_df_train['PROF'] / (merged_df_train['ENGLISH'] +
+                                                      merged_df_train['OTHER_LNG'] +
+                                                      merged_df_train['FRANCAIS'] +
+                                                      merged_df_train['GERMAN'] +
+                                                      merged_df_train['ESPANOL'] +
+                                                      merged_df_train['ARABIC'] +
+                                                      merged_df_train['RUSSIAN'] +
+                                                      merged_df_train['ITALIANO'] +
+                                                      merged_df_train['CHINESE']))
+# For Test dataset
+lng_df = pd.DataFrame(columns=['user_id'])
+lng_df['user_id'] = df_test['user_id']
+merged_df_test = lng_df.merge(df_lng, on='user_id', how='left')
+merged_df_test = merged_df_test.groupby('user_id').sum().reset_index()
+# We will divide total proficiency the total languages.
+merged_df_test['PROF'] = (merged_df_test['PROF'] / (merged_df_test['ENGLISH'] +
+                                                      merged_df_test['OTHER_LNG'] +
+                                                      merged_df_test['FRANCAIS'] +
+                                                      merged_df_test['GERMAN'] +
+                                                      merged_df_test['ESPANOL'] +
+                                                      merged_df_test['ARABIC'] +
+                                                      merged_df_test['RUSSIAN'] +
+                                                      merged_df_test['ITALIANO'] +
+                                                      merged_df_test['CHINESE']))
+### Train & Test Concat for Language
+dfc_train = VLOOKUP(dfc_train, merged_df_train, 'user_id', ['TURKISH', 'ENGLISH', 'OTHER_LNG', 'FRANCAIS', 'GERMAN' ,'ESPANOL', 'ARABIC', 'RUSSIAN', 'ITALIANO', 'CHINESE', 'PROF' ])
+dfc_test = VLOOKUP(dfc_test, merged_df_test, 'user_id', ['TURKISH', 'ENGLISH', 'OTHER_LNG', 'FRANCAIS', 'GERMAN' ,'ESPANOL', 'ARABIC', 'RUSSIAN', 'ITALIANO', 'CHINESE', 'PROF' ])
